@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Imposter Game</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0e0e10;
+    --surface: #17171a;
+    --surface2: #1f1f23;
+    --border: #2a2a30;
+    --border2: #353540;
+    --text: #f0f0ee;
+    --muted: #6b6b7a;
+    --soft: #9898a8;
+    --accent: #e8ff47;
+    --accent-dim: rgba(232,255,71,0.12);
+    --red: #ff4d4d;
+    --red-dim: rgba(255,77,77,0.13);
+    --blue: #4da8ff;
+    --blue-dim: rgba(77,168,255,0.13);
+    --gold: #ffcc44;
+    --gold-dim: rgba(255,204,68,0.13);
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 32px 16px 64px;
+    background-image:
+      radial-gradient(ellipse 60% 40% at 50% -10%, rgba(232,255,71,0.06) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 30% at 80% 110%, rgba(77,168,255,0.04) 0%, transparent 60%);
+  }
+
+  /* ── Header ──────────────────────────── */
+  .site-header {
+    text-align: center;
+    margin-bottom: 36px;
+  }
+  .site-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 800;
+    letter-spacing: -1px;
+    color: var(--text);
+    line-height: 1;
+  }
+  .site-title span { color: var(--accent); }
+  .site-sub {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-top: 6px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  /* ── Card ────────────────────────────── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    width: 100%;
+    max-width: 580px;
+    margin-bottom: 16px;
+  }
+
+  .card-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: var(--text);
+  }
+
+  /* ── Badge ───────────────────────────── */
+  .badge {
+    display: inline-block;
+    background: var(--accent);
+    color: #0e0e10;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.68rem;
+    font-weight: 800;
+    padding: 3px 10px;
+    border-radius: 20px;
+    margin-bottom: 14px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* ── Label ───────────────────────────── */
+  .lbl {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--muted);
+    margin-bottom: 7px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+  }
+
+  /* ── Input / Select ──────────────────── */
+  input[type="text"], select {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 0.93rem;
+    font-family: 'DM Sans', sans-serif;
+    background: var(--surface2);
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s;
+    -webkit-appearance: none;
+  }
+  input[type="text"]:focus, select:focus {
+    border-color: var(--accent);
+  }
+  input[type="text"]::placeholder { color: var(--muted); }
+
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b6b7a' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+    cursor: pointer;
+  }
+
+  /* ── Buttons ─────────────────────────── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 11px 20px;
+    border-radius: var(--radius-sm);
+    font-size: 0.88rem;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+
+  .btn-accent { background: var(--accent); color: #0e0e10; }
+  .btn-accent:hover:not(:disabled) { background: #d4e83e; }
+
+  .btn-red { background: var(--red-dim); color: var(--red); border: 1px solid rgba(255,77,77,0.25); }
+  .btn-red:hover:not(:disabled) { background: rgba(255,77,77,0.22); }
+
+  .btn-ghost { background: transparent; color: var(--soft); border: 1px solid var(--border); }
+  .btn-ghost:hover:not(:disabled) { border-color: var(--border2); color: var(--text); }
+
+  .btn-full { width: 100%; }
+  .btn-sm { padding: 6px 13px; font-size: 0.8rem; }
+
+  /* ── Input Row ───────────────────────── */
+  .input-row { display: flex; gap: 8px; margin-bottom: 12px; }
+  .input-row input { flex: 1; }
+
+  /* ── Player Tags ─────────────────────── */
+  .tags-wrap { display: flex; flex-wrap: wrap; gap: 6px; min-height: 34px; margin: 6px 0 4px; }
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 4px 10px 4px 12px;
+    font-size: 0.83rem;
+    font-weight: 500;
+    color: var(--text);
+    animation: popIn 0.15s ease;
+  }
+  @keyframes popIn { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .tag button {
+    background: none; border: none; cursor: pointer;
+    color: var(--muted); font-size: 0.9rem; line-height: 1;
+    padding: 0; display: flex; align-items: center; transition: color 0.1s;
+  }
+  .tag button:hover { color: var(--red); }
+
+  .player-count { font-size: 0.78rem; color: var(--muted); margin-top: 4px; }
+  .player-count strong { color: var(--text); }
+
+  /* ── Divider ─────────────────────────── */
+  .divider { height: 1px; background: var(--border); margin: 22px 0; }
+
+  /* ── Config Row ──────────────────────── */
+  .cfg-row { display: flex; gap: 12px; align-items: flex-end; }
+  .cfg-row > div { flex: 1; }
+
+  /* ── Info Box ────────────────────────── */
+  .info-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 11px 14px;
+    font-size: 0.85rem;
+    color: var(--soft);
+    margin-bottom: 16px;
+    line-height: 1.5;
+  }
+  .info-box strong { color: var(--text); }
+
+  /* ── Phase System ────────────────────── */
+  .phase { display: none; }
+  .phase.active { display: block; animation: fadeUp 0.2s ease; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ── Role Cards Grid ─────────────────── */
+  .role-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .role-card {
+    border-radius: var(--radius);
+    padding: 16px 10px;
+    text-align: center;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    transition: all 0.2s;
+    user-select: none;
+    position: relative;
+    overflow: hidden;
+  }
+  .role-card:not(.flipped):hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+  .role-card .card-front { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .role-card .card-back { display: none; flex-direction: column; align-items: center; gap: 6px; }
+  .role-card.flipped .card-front { display: none; }
+  .role-card.flipped .card-back { display: flex; }
+  .role-card.flipped { cursor: default; }
+
+  .role-card.flipped.imposter { background: var(--red-dim); border-color: rgba(255,77,77,0.3); }
+  .role-card.flipped.crewmate { background: var(--blue-dim); border-color: rgba(77,168,255,0.3); }
+
+  .role-card-name {
+    font-size: 0.8rem; font-weight: 600;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    max-width: 100%; color: var(--text);
+  }
+  .role-card-icon { font-size: 1.5rem; line-height: 1; }
+  .role-card-hint { font-size: 0.68rem; color: var(--muted); }
+  .role-card-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .role-card.flipped.imposter .role-card-label { color: var(--red); }
+  .role-card.flipped.crewmate .role-card-label { color: var(--blue); }
+
+  /* ── Voting Grid ─────────────────────── */
+  .vote-section-header {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-bottom: 8px;
+    margin-top: 16px;
+  }
+  .vote-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; }
+  .vote-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface2);
+    transition: border-color 0.15s;
+  }
+  .vote-row:hover { border-color: var(--border2); }
+  .vote-row-info { flex: 1; min-width: 0; }
+  .vote-row-name {
+    font-size: 0.92rem; font-weight: 600;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .vote-badges { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+  .vote-badge {
+    font-size: 0.68rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1px 7px;
+    color: var(--soft);
+    font-weight: 500;
+  }
+  .vote-count { font-size: 1rem; font-weight: 700; color: var(--accent); min-width: 22px; text-align: center; }
+  .vote-btn {
+    padding: 5px 13px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: transparent;
+    cursor: pointer;
+    color: var(--soft);
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.12s;
+    white-space: nowrap;
+  }
+  .vote-btn:hover:not(:disabled) { background: var(--accent); color: #0e0e10; border-color: var(--accent); }
+  .vote-btn.active { background: var(--accent); color: #0e0e10; border-color: var(--accent); }
+  .vote-btn:disabled { opacity: 0.25; cursor: not-allowed; }
+
+  /* ── Voter picker ────────────────────── */
+  .voter-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    margin-bottom: 14px;
+  }
+
+  /* ── Results ─────────────────────────── */
+  .result-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; }
+  .result-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 14px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    transition: all 0.3s;
+  }
+  .result-row.top {
+    border-color: rgba(255,204,68,0.35);
+    background: var(--gold-dim);
+  }
+  .result-name {
+    font-size: 0.92rem; font-weight: 600;
+    min-width: 90px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .result-bar-track {
+    flex: 1;
+    background: var(--surface);
+    border-radius: 4px;
+    height: 6px;
+    overflow: hidden;
+  }
+  .result-bar {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 4px;
+    transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+  }
+  .result-row.top .result-bar { background: var(--gold); }
+  .result-votes { font-size: 0.88rem; font-weight: 700; min-width: 18px; text-align: right; }
+
+  /* ── Elim tags ───────────────────────── */
+  .elim-wrap { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .elim-tag {
+    font-size: 0.78rem; padding: 3px 10px; border-radius: 20px;
+    font-weight: 600; background: var(--red-dim); color: var(--red);
+    border: 1px solid rgba(255,77,77,0.25);
+  }
+
+  /* ── Action Row ──────────────────────── */
+  .action-row { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  /* ── End Summary ─────────────────────── */
+  .end-group { margin-bottom: 18px; }
+  .role-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 4px 11px;
+    border-radius: 20px;
+    margin: 3px;
+  }
+  .role-pill.imp { background: var(--red-dim); color: var(--red); border: 1px solid rgba(255,77,77,0.25); }
+  .role-pill.crew { background: var(--blue-dim); color: var(--blue); border: 1px solid rgba(77,168,255,0.25); }
+
+  /* ── Modal ───────────────────────────── */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 26px;
+    width: 100%;
+    max-width: 380px;
+    animation: fadeUp 0.18s ease;
+  }
+  .modal-title { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; margin-bottom: 8px; }
+  .modal-desc { font-size: 0.84rem; color: var(--soft); margin-bottom: 16px; }
+  .modal-options { display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; }
+  .modal-option {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 0.9rem; font-weight: 500;
+    transition: border-color 0.12s;
+  }
+  .modal-option:hover { border-color: var(--border2); }
+  .modal-option input[type="checkbox"] {
+    width: 15px; height: 15px; cursor: pointer; accent-color: var(--accent);
+  }
+
+  /* ── Responsive ──────────────────────── */
+  @media (max-width: 480px) {
+    .role-grid { grid-template-columns: repeat(3, 1fr); }
+    .cfg-row { flex-direction: column; gap: 12px; }
+    .card { padding: 20px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="site-header">
+  <div class="site-title">IMPOST<span>E</span>R</div>
+  <div class="site-sub">Find the traitor among you</div>
+</header>
+
+<!-- ── PHASE 1: SETUP ──────────────────────────── -->
+<div class="phase active card" id="phase-setup">
+  <div class="card-title">👥 Register Players</div>
+
+  <label class="lbl">Add Player Name</label>
+  <div class="input-row">
+    <input type="text" id="player-input" placeholder="e.g. Alice" maxlength="20" autocomplete="off"/>
+    <button class="btn btn-accent" onclick="addPlayer()">Add</button>
+  </div>
+
+  <div class="tags-wrap" id="tags-wrap"></div>
+  <div class="player-count">Players: <strong id="player-count">0</strong> / 15</div>
+
+  <div class="divider"></div>
+
+  <div class="cfg-row" style="margin-bottom:20px;">
+    <div>
+      <label class="lbl">Number of Imposters</label>
+      <select id="imposter-count">
+        <option value="1">1 Imposter</option>
+        <option value="2">2 Imposters</option>
+        <option value="3">3 Imposters</option>
+      </select>
+    </div>
+  </div>
+
+  <button class="btn btn-accent btn-full" id="start-btn" onclick="startGame()" disabled>
+    Start Game &amp; Assign Roles
+  </button>
+</div>
+
+<!-- ── PHASE 2: ROLE REVEAL ────────────────────── -->
+<div class="phase card" id="phase-roles">
+  <div class="badge" id="roles-badge">Round 1</div>
+  <div class="card-title">🂠 Role Reveal</div>
+  <div class="info-box" style="margin-bottom:16px;">Each player tap your card <strong>privately</strong> to reveal your role — don't show anyone!</div>
+  <div class="role-grid" id="role-grid"></div>
+  <button class="btn btn-accent btn-full" onclick="goToVoting()">Start Voting →</button>
+</div>
+
+<!-- ── PHASE 3: VOTING ─────────────────────────── -->
+<div class="phase card" id="phase-voting">
+  <div class="badge" id="voting-badge">Round 1 · Voting</div>
+  <div class="card-title">🗳️ Public Voting</div>
+
+  <div class="voter-box">
+    <label class="lbl">Who is voting right now?</label>
+    <select id="voter-select" onchange="onVoterChange()">
+      <option value="">— Select your name —</option>
+    </select>
+  </div>
+
+  <div class="info-box" id="vote-status">Select your name above, then vote for the person you suspect is an imposter.</div>
+
+  <div class="vote-section-header">Players — tap to vote</div>
+  <div class="vote-list" id="vote-list"></div>
+
+  <button class="btn btn-accent btn-full" onclick="goToResults()">View Results →</button>
+</div>
+
+<!-- ── PHASE 4: RESULTS ────────────────────────── -->
+<div class="phase card" id="phase-results">
+  <div class="badge" id="results-badge">Round 1 · Results</div>
+  <div class="card-title">📊 Voting Results</div>
+
+  <div class="result-list" id="result-list"></div>
+
+  <div id="elim-section" style="display:none; margin-bottom:18px;">
+    <label class="lbl">Eliminated This Round</label>
+    <div class="elim-wrap" id="elim-wrap"></div>
+  </div>
+
+  <div class="info-box"><strong>Host's call:</strong> Look at the results and decide who (if anyone) to eliminate this round.</div>
+
+  <div class="action-row">
+    <button class="btn btn-red" onclick="openModal()">Eliminate Player(s)</button>
+    <button class="btn btn-ghost" onclick="nextRound()">Next Round →</button>
+    <button class="btn btn-ghost" onclick="endGame()">End Game</button>
+  </div>
+</div>
+
+<!-- ── PHASE 5: END ────────────────────────────── -->
+<div class="phase card" id="phase-end">
+  <div class="badge">Game Over</div>
+  <div class="card-title">🎉 Final Results</div>
+  <div class="divider"></div>
+  <div id="end-summary"></div>
+  <div class="divider"></div>
+  <button class="btn btn-accent btn-full" onclick="resetGame()">Play Again</button>
+</div>
+
+<!-- ── ELIMINATE MODAL ─────────────────────────── -->
+<div class="modal-overlay" id="modal-overlay" onclick="handleOverlayClick(event)">
+  <div class="modal">
+    <div class="modal-title">Eliminate Player(s)</div>
+    <div class="modal-desc">Select who to eliminate. Their role will be revealed to everyone.</div>
+    <div class="modal-options" id="modal-options"></div>
+    <div class="action-row">
+      <button class="btn btn-red" onclick="confirmEliminate()">Confirm</button>
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ─── State ──────────────────────────────────────────────────────
+  let players = [];     // { name, role, eliminated }
+  let round = 1;
+  let votes = {};       // { voterName: targetName }
+  let allEliminated = []; // names across all rounds
+  let pendingElim = [];
+
+  // ─── Setup ──────────────────────────────────────────────────────
+  const playerInput = document.getElementById('player-input');
+  playerInput.addEventListener('keydown', e => { if (e.key === 'Enter') addPlayer(); });
+
+  function addPlayer() {
+    const name = playerInput.value.trim();
+    if (!name) return;
+    if (players.length >= 15) { showToast('Maximum 15 players reached!'); return; }
+    if (players.find(p => p.name.toLowerCase() === name.toLowerCase())) {
+      showToast('Name already added!'); playerInput.value = ''; return;
+    }
+    players.push({ name, role: null, eliminated: false });
+    playerInput.value = '';
+    renderTags();
+    updateStartBtn();
+    playerInput.focus();
+  }
+
+  function removePlayer(name) {
+    players = players.filter(p => p.name !== name);
+    renderTags();
+    updateStartBtn();
+  }
+
+  function renderTags() {
+    const wrap = document.getElementById('tags-wrap');
+    wrap.innerHTML = players.map(p => `
+      <span class="tag">
+        ${esc(p.name)}
+        <button onclick="removePlayer('${esc(p.name)}')" title="Remove">✕</button>
+      </span>`).join('');
+    document.getElementById('player-count').textContent = players.length;
+  }
+
+  function updateStartBtn() {
+    const btn = document.getElementById('start-btn');
+    const n = players.length;
+    btn.disabled = n < 3;
+    btn.textContent = n < 3 ? `Need ${3 - n} more player${3 - n > 1 ? 's' : ''} to start` : 'Start Game & Assign Roles';
+  }
+
+  // ─── Start Game ─────────────────────────────────────────────────
+  function startGame() {
+    const impCount = parseInt(document.getElementById('imposter-count').value);
+    if (impCount >= players.length) { showToast('Too many imposters for player count!'); return; }
+
+    const idxs = shuffle([...Array(players.length).keys()]);
+    players.forEach(p => p.role = 'crewmate');
+    idxs.slice(0, impCount).forEach(i => players[i].role = 'imposter');
+
+    round = 1;
+    votes = {};
+    allEliminated = [];
+
+    showPhase('phase-roles');
+    renderRoleGrid();
+  }
+
+  // ─── Role Reveal ────────────────────────────────────────────────
+  function renderRoleGrid() {
+    document.getElementById('roles-badge').textContent = `Round ${round}`;
+    const active = getActive();
+    const grid = document.getElementById('role-grid');
+    grid.innerHTML = active.map(p => `
+      <div class="role-card" id="rc-${sid(p.name)}" onclick="flipCard('${esc(p.name)}')">
+        <div class="card-front">
+          <div class="role-card-icon">🂠</div>
+          <div class="role-card-name">${esc(p.name)}</div>
+          <div class="role-card-hint">tap to reveal</div>
+        </div>
+        <div class="card-back">
+          <div class="role-card-name">${esc(p.name)}</div>
+          <div class="role-card-icon">${p.role === 'imposter' ? '🔴' : '🔵'}</div>
+          <div class="role-card-label">${p.role}</div>
+        </div>
+      </div>`).join('');
+  }
+
+  function flipCard(name) {
+    const p = players.find(x => x.name === name);
+    const el = document.getElementById('rc-' + sid(name));
+    if (!el || el.classList.contains('flipped')) return;
+    el.classList.add('flipped', p.role);
+  }
+
+  // ─── Voting ──────────────────────────────────────────────────────
+  function goToVoting() {
+    votes = {};
+    document.getElementById('voting-badge').textContent = `Round ${round} · Voting`;
+    document.getElementById('voter-select').value = '';
+    showPhase('phase-voting');
+    renderVoterSelect();
+    renderVoteList();
+    updateVoteStatus();
+  }
+
+  function renderVoterSelect() {
+    const sel = document.getElementById('voter-select');
+    const active = getActive();
+    sel.innerHTML = '<option value="">— Select your name —</option>' +
+      active.map(p => `<option value="${esc(p.name)}">${esc(p.name)}</option>`).join('');
+  }
+
+  function onVoterChange() {
+    renderVoteList();
+    updateVoteStatus();
+  }
+
+  function updateVoteStatus() {
+    const voter = document.getElementById('voter-select').value;
+    const box = document.getElementById('vote-status');
+    if (!voter) {
+      box.innerHTML = 'Select your name above, then vote for the person you suspect is an imposter.';
+    } else if (votes[voter]) {
+      box.innerHTML = `<strong>${esc(voter)}</strong> voted for <strong>${esc(votes[voter])}</strong> ✓`;
+    } else {
+      box.innerHTML = `<strong>${esc(voter)}</strong> — tap a player below to cast your vote.`;
+    }
+  }
+
+  function renderVoteList() {
+    const voter = document.getElementById('voter-select').value;
+    const active = getActive();
+    const tally = {};
+    active.forEach(p => tally[p.name] = 0);
+    Object.values(votes).forEach(t => { if (tally[t] !== undefined) tally[t]++; });
+
+    const list = document.getElementById('vote-list');
+    list.innerHTML = active.map(p => {
+      const isSelf = p.name === voter;
+      const myTarget = voter ? votes[voter] : null;
+      const isMyVote = myTarget === p.name;
+      const votersForP = Object.entries(votes).filter(([, t]) => t === p.name).map(([v]) => v);
+      const count = tally[p.name];
+
+      return `
+        <div class="vote-row">
+          <div class="vote-row-info">
+            <div class="vote-row-name">${esc(p.name)}${isSelf ? ' <span style="color:var(--muted);font-size:0.72rem;">(you)</span>' : ''}</div>
+            ${votersForP.length ? `<div class="vote-badges">${votersForP.map(v => `<span class="vote-badge">${esc(v)}</span>`).join('')}</div>` : ''}
+          </div>
+          <div class="vote-count">${count > 0 ? count : ''}</div>
+          <button class="vote-btn${isMyVote ? ' active' : ''}"
+            onclick="castVote('${esc(p.name)}')"
+            ${!voter || isSelf ? 'disabled' : ''}>
+            ${isMyVote ? '✓ Voted' : 'Vote'}
+          </button>
+        </div>`;
+    }).join('');
+  }
+
+  function castVote(target) {
+    const voter = document.getElementById('voter-select').value;
+    if (!voter || voter === target) return;
+    votes[voter] = target;
+    renderVoteList();
+    updateVoteStatus();
+  }
+
+  // ─── Results ─────────────────────────────────────────────────────
+  function goToResults() {
+    document.getElementById('results-badge').textContent = `Round ${round} · Results`;
+    document.getElementById('elim-section').style.display = 'none';
+    showPhase('phase-results');
+    renderResults();
+  }
+
+  function renderResults() {
+    const active = getActive();
+    const tally = {};
+    active.forEach(p => tally[p.name] = 0);
+    Object.values(votes).forEach(t => { if (tally[t] !== undefined) tally[t]++; });
+
+    const maxV = Math.max(...Object.values(tally), 0);
+    const sorted = [...active].sort((a, b) => tally[b.name] - tally[a.name]);
+
+    const list = document.getElementById('result-list');
+    list.innerHTML = sorted.map(p => {
+      const v = tally[p.name];
+      const pct = maxV > 0 ? Math.round((v / maxV) * 100) : 0;
+      const isTop = v === maxV && maxV > 0;
+      return `
+        <div class="result-row${isTop ? ' top' : ''}">
+          <div class="result-name">${isTop ? '⚠️ ' : ''}${esc(p.name)}</div>
+          <div class="result-bar-track"><div class="result-bar" style="width:${pct}%"></div></div>
+          <div class="result-votes">${v}</div>
+        </div>`;
+    }).join('');
+  }
+
+  // ─── Eliminate Modal ─────────────────────────────────────────────
+  function openModal() {
+    pendingElim = [];
+    const opts = document.getElementById('modal-options');
+    opts.innerHTML = getActive().map(p => `
+      <label class="modal-option">
+        <input type="checkbox" value="${esc(p.name)}" onchange="toggleElim('${esc(p.name)}', this.checked)"/>
+        ${esc(p.name)}
+      </label>`).join('');
+    document.getElementById('modal-overlay').classList.add('open');
+  }
+
+  function toggleElim(name, checked) {
+    pendingElim = checked ? [...pendingElim, name] : pendingElim.filter(n => n !== name);
+  }
+
+  function confirmEliminate() {
+    pendingElim.forEach(name => {
+      const p = players.find(x => x.name === name);
+      if (p) { p.eliminated = true; allEliminated.push(name); }
+    });
+    closeModal();
+    renderResults();
+
+    if (allEliminated.length > 0) {
+      document.getElementById('elim-section').style.display = 'block';
+      document.getElementById('elim-wrap').innerHTML = allEliminated.map(n => {
+        const p = players.find(x => x.name === n);
+        return `<span class="elim-tag">${esc(n)} (${p ? p.role : '?'})</span>`;
+      }).join('');
+    }
+  }
+
+  function closeModal() {
+    document.getElementById('modal-overlay').classList.remove('open');
+  }
+
+  function handleOverlayClick(e) {
+    if (e.target === e.currentTarget) closeModal();
+  }
+
+  // ─── Next Round / End ────────────────────────────────────────────
+  function nextRound() {
+    if (getActive().length < 2) { endGame(); return; }
+    round++;
+    votes = {};
+    showPhase('phase-roles');
+    renderRoleGrid();
+  }
+
+  function endGame() {
+    showPhase('phase-end');
+    const imposters = players.filter(p => p.role === 'imposter');
+    const crew = players.filter(p => p.role === 'crewmate');
+    document.getElementById('end-summary').innerHTML = `
+      <div class="end-group">
+        <label class="lbl">Imposters</label>
+        <div style="margin-top:8px;">${imposters.map(p => `<span class="role-pill imp">🔴 ${esc(p.name)}${p.eliminated ? ' · eliminated' : ''}</span>`).join('')}</div>
+      </div>
+      <div class="end-group">
+        <label class="lbl">Crewmates</label>
+        <div style="margin-top:8px;">${crew.map(p => `<span class="role-pill crew">🔵 ${esc(p.name)}${p.eliminated ? ' · eliminated' : ''}</span>`).join('')}</div>
+      </div>
+      <div style="font-size:0.82rem;color:var(--muted);">Total rounds: <strong style="color:var(--text);">${round}</strong></div>`;
+  }
+
+  function resetGame() {
+    players = [];
+    votes = {};
+    round = 1;
+    allEliminated = [];
+    renderTags();
+    updateStartBtn();
+    document.getElementById('imposter-count').value = '1';
+    showPhase('phase-setup');
+  }
+
+  // ─── Helpers ─────────────────────────────────────────────────────
+  function getActive() { return players.filter(p => !p.eliminated); }
+
+  function showPhase(id) {
+    document.querySelectorAll('.phase').forEach(el => el.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function shuffle(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function sid(name) { return name.replace(/[^a-zA-Z0-9]/g, '_'); }
+  function esc(str) { return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
+  function showToast(msg) {
+    let t = document.getElementById('toast');
+    if (!t) {
+      t = document.createElement('div');
+      t.id = 'toast';
+      t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1f1f23;border:1px solid #2a2a30;color:#f0f0ee;padding:10px 18px;border-radius:8px;font-size:0.85rem;font-family:DM Sans,sans-serif;z-index:999;transition:opacity .3s;';
+      document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    t.style.opacity = '1';
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => { t.style.opacity = '0'; }, 2200);
+  }
+</script>
+</body>
+</html>
